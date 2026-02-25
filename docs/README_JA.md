@@ -4,7 +4,7 @@
 </p>
 
 <p align="center">
-  <a href="../README.md">中文</a> | <a href="./README_EN.md">English</a> | <a href="./README_KO.md">한국어</a>
+  <a href="../README.md">English</a> | <a href="./README_KO.md">한국어</a>
 </p>
 
 ---
@@ -309,6 +309,12 @@ OPENNEWS_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiNjU1MW5ld3Nt
 | Continue.dev | YAML / JSON | 対応 |
 | Cherry Studio | GUI | 対応 |
 | Zed | JSON 設定 | 対応 |
+
+---
+
+## 関連プロジェクト
+
+- [twitter-mcp](https://github.com/6551-io/twitter-mcp) - Twitter/X データ MCP サーバー
 
 ---
 

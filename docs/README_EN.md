@@ -4,7 +4,7 @@
 </p>
 
 <p align="center">
-  <a href="../README.md">中文</a> | <a href="./README_JA.md">日本語</a> | <a href="./README_KO.md">한국어</a>
+  <a href="./README_JA.md">日本語</a> | <a href="./README_KO.md">한국어</a>
 </p>
 
 ---
@@ -68,12 +68,6 @@ Once connected, just ask your AI assistant:
 | "High-impact news, AI score above 80" | High-score filtering |
 | "Bullish signals" | Filter by trading signal (long) |
 | "Subscribe to live news" | WebSocket real-time feed |
-| "Show elonmusk's Twitter profile" | Get Twitter user info |
-| "What did elonmusk tweet recently" | Get user tweets |
-| "Search Bitcoin related tweets" | Twitter keyword search |
-| "Who followed/unfollowed elonmusk recently" | Get follower events |
-| "What tweets did elonmusk delete" | Get deleted tweets |
-| "Which KOLs follow elonmusk" | Get KOL followers |
 
 ---
 
@@ -92,14 +86,6 @@ Once connected, just ask your AI assistant:
 | AI | `get_high_score_news` | Articles with score >= threshold |
 | | `get_news_by_signal` | By signal: long / short / neutral |
 | Real-time | `subscribe_latest_news` | WebSocket live collection |
-| Twitter | `get_twitter_user` | Get Twitter user profile |
-| | `get_twitter_user_by_id` | Get user profile by ID |
-| | `get_twitter_user_tweets` | Get user tweets |
-| | `search_twitter` | Twitter search |
-| | `search_twitter_advanced` | Advanced Twitter search (multiple filters) |
-| | `get_twitter_follower_events` | Get follower/unfollower events |
-| | `get_twitter_deleted_tweets` | Get deleted tweets |
-| | `get_twitter_kol_followers` | Get KOL followers |
 
 ---
 
@@ -318,6 +304,12 @@ OPENNEWS_TOKEN=<your-token> \
 
 ---
 
+## Related Projects
+
+- [twitter-mcp](https://github.com/6551-io/twitter-mcp) - Twitter/X data MCP server
+
+---
+
 ## Development
 
 ```bash
@@ -334,7 +326,7 @@ npx @modelcontextprotocol/inspector uv --directory /path/to/opennews-mcp run ope
 ### Project Structure
 
 ```
-├── README.md                  # 中文 (default)
+├── README.md
 ├── docs/
 │   ├── README_EN.md           # English
 │   ├── README_JA.md           # 日本語
@@ -348,7 +340,7 @@ npx @modelcontextprotocol/inspector uv --directory /path/to/opennews-mcp run ope
     ├── app.py                 # FastMCP instance
     ├── config.py              # Config loader
     ├── api_client.py          # HTTP + WebSocket
-    └── tools/                 # 11 tools
+    └── tools/                 # Tools
 ```
 
 ## License
