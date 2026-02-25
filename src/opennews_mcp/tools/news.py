@@ -1,6 +1,6 @@
 """News content tools — search and retrieve crypto news via REST API.
 
-Uses POST /v1/news/search as the primary data source.
+Uses POST /open/news_search as the primary data source.
 Returns raw article data as-is from the API.
 """
 
@@ -75,22 +75,23 @@ async def search_news_by_coin(coin: str, ctx: Context, limit: int = 10) -> dict:
 
 
 @mcp.tool()
-async def get_news_by_source(source: str, ctx: Context, limit: int = 10) -> dict:
+async def get_news_by_source(engine_type: str, news_type: str, ctx: Context, limit: int = 10) -> dict:
     """Get news articles from a specific source.
 
-    Use list_news_types first to see available source codes.
+    Use get_news_sources first to see available engine types and news type codes.
 
     Args:
-        source: The news source code (e.g. "Bloomberg", "Reuters", "Coindesk").
+        engine_type: The engine type (e.g. "news", "listing", "onchain", "meme", "market").
+        news_type: The news source code (e.g. "Bloomberg", "Reuters", "Coindesk").
         limit: Maximum results (default 10, max 100).
     """
     api = ctx.request_context.lifespan_context.api
     limit = clamp_limit(limit)
     try:
-        result = await api.search_news(news_type=source, limit=limit, page=1)
+        result = await api.search_news(engine_types={engine_type: [news_type]}, limit=limit, page=1)
         data = result.get("data", [])[:limit]
         return make_serializable({
-            "success": True, "source": source, "data": data,
+            "success": True, "engine_type": engine_type, "news_type": news_type, "data": data,
             "count": len(data), "total": result.get("total", 0),
         })
     except Exception as e:
@@ -110,7 +111,7 @@ async def get_news_by_engine(engine_type: str, ctx: Context, limit: int = 10) ->
     api = ctx.request_context.lifespan_context.api
     limit = clamp_limit(limit)
     try:
-        result = await api.search_news(engine_type=engine_type, limit=limit, page=1)
+        result = await api.search_news(engine_types={engine_type: []}, limit=limit, page=1)
         data = result.get("data", [])[:limit]
         return make_serializable({
             "success": True, "engine_type": engine_type, "data": data,
@@ -121,50 +122,44 @@ async def get_news_by_engine(engine_type: str, ctx: Context, limit: int = 10) ->
 
 
 @mcp.tool()
-async def search_news_by_date(
+async def search_news_advanced(
     ctx: Context,
-    start_date: str = "",
-    end_date: str = "",
     coins: str = "",
     keyword: str = "",
+    engine_types: str = "",
+    has_coin: bool = False,
     limit: int = 10,
 ) -> dict:
-    """Search news within a date range.
+    """Advanced news search with multiple filters.
 
     Args:
-        start_date: Start date as ISO string (e.g. "2026-02-20") or unix timestamp in ms.
-        end_date: End date as ISO string (e.g. "2026-02-23") or unix timestamp in ms.
         coins: Comma-separated coin symbols (e.g. "BTC,ETH").
         keyword: Optional search keyword.
+        engine_types: Engine type filter in format "type1:cat1,cat2;type2:cat3" (e.g. "news:Bloomberg,Reuters;listing:").
+        has_coin: If true, only return news that have associated coins.
         limit: Maximum results (default 10, max 100).
     """
     api = ctx.request_context.lifespan_context.api
     limit = clamp_limit(limit)
 
-    start_ts = None
-    end_ts = None
-    if start_date:
-        try:
-            start_ts = int(start_date)
-        except ValueError:
-            from datetime import datetime
-            dt = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
-            start_ts = int(dt.timestamp() * 1000)
-    if end_date:
-        try:
-            end_ts = int(end_date)
-        except ValueError:
-            from datetime import datetime
-            dt = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
-            end_ts = int(dt.timestamp() * 1000)
-
     coin_list = [c.strip() for c in coins.split(",") if c.strip()] if coins else None
+
+    # 解析 engine_types 字符串为 dict
+    engine_types_dict = None
+    if engine_types:
+        engine_types_dict = {}
+        for part in engine_types.split(";"):
+            if ":" in part:
+                engine, cats = part.split(":", 1)
+                engine = engine.strip()
+                cat_list = [c.strip() for c in cats.split(",") if c.strip()]
+                engine_types_dict[engine] = cat_list
 
     try:
         result = await api.search_news(
             coins=coin_list, query=keyword or None,
+            engine_types=engine_types_dict, has_coin=has_coin,
             limit=limit, page=1,
-            start_date=start_ts, end_date=end_ts,
         )
         data = result.get("data", [])[:limit]
         return make_serializable({

@@ -1,6 +1,6 @@
 {
-  "api_base_url": "https://ai.6551.io/news-platform",
-  "wss_url": "wss://ai.6551.io/news-platform/rpc",
-  "api_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiNjU1MW5ld3NtY3AiLCJ1c2VybmFtZSI6IjY1NTFuZXdzbWNwIn0.namttZDCVLOIlEGwIkJPBrcV-foaXQgqibDcmpck02c",
+  "api_base_url": "https://ai.6551.io",
+  "wss_url": "wss://ai.6551.io/open/news_wss",
+  "api_token": "",
   "max_rows": 100
 }

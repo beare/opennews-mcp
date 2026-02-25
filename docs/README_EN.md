@@ -11,26 +11,24 @@
 
 ## Quick Install
 
-> **Trial period**: A free public API Key is provided — copy and use, no sign-up required.
+> **First, go to [https://6551.io/mcp](https://6551.io/mcp) to get your API Token.**
 
 ### Claude Code
 
 ```bash
 claude mcp add opennews \
-  -e OPENNEWS_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiNjU1MW5ld3NtY3AiLCJ1c2VybmFtZSI6IjY1NTFuZXdzbWNwIn0.namttZDCVLOIlEGwIkJPBrcV-foaXQgqibDcmpck02c \
+  -e OPENNEWS_TOKEN=<your-token> \
   -- uv --directory /path/to/opennews-mcp run opennews-mcp
 ```
 
-> Replace `/path/to/opennews-mcp` with your local project path.
+> Replace `/path/to/opennews-mcp` with your local project path, and `<your-token>` with your Token.
 
 ### OpenClaw
 
 ```bash
-export OPENNEWS_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiNjU1MW5ld3NtY3AiLCJ1c2VybmFtZSI6IjY1NTFuZXdzbWNwIn0.namttZDCVLOIlEGwIkJPBrcV-foaXQgqibDcmpck02c"
+export OPENNEWS_TOKEN="<your-token>"
 cp -r openclaw-skill/opennews ~/.openclaw/skills/
 ```
-
-> The above uses a free trial Token. After the trial period, replace it with your own Key. See [Configuration](#configuration).
 
 ---
 
@@ -38,7 +36,7 @@ cp -r openclaw-skill/opennews ~/.openclaw/skills/
 
 Not sure if this MCP is safe? Paste the prompt below to your AI assistant — it will review the source code first, then install if safe:
 
-> **Copy this prompt and send it to your AI assistant (replace `<project-path>` with the actual path):**
+> **Copy this prompt and send it to your AI assistant (replace `<project-path>` and `<your-token>` with actual values):**
 
 ```text
 Please review and install the opennews-mcp MCP server for me. The project is at <project-path>.
@@ -50,8 +48,8 @@ Steps:
    - src/opennews_mcp/tools/*.py — Confirm all tools only perform API queries, no file writes, command execution, or dangerous operations
    - pyproject.toml — Confirm dependencies are only mcp, httpx, websockets, no suspicious packages
 2. Tell me your conclusion: safe / risky / problematic, with specific reasons
-3. If safe, run the install (using the free trial Token):
-   claude mcp add opennews -e OPENNEWS_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiNjU1MW5ld3NtY3AiLCJ1c2VybmFtZSI6IjY1NTFuZXdzbWNwIn0.namttZDCVLOIlEGwIkJPBrcV-foaXQgqibDcmpck02c -- uv --directory <project-path> run opennews-mcp
+3. If safe, run the install (get Token from https://6551.io/mcp):
+   claude mcp add opennews -e OPENNEWS_TOKEN=<your-token> -- uv --directory <project-path> run opennews-mcp
 ```
 
 ---
@@ -70,6 +68,9 @@ Once connected, just ask your AI assistant:
 | "High-impact news, AI score above 80" | High-score filtering |
 | "Bullish signals" | Filter by trading signal (long) |
 | "Subscribe to live news" | WebSocket real-time feed |
+| "Show elonmusk's Twitter profile" | Get Twitter user info |
+| "What did elonmusk tweet recently" | Get user tweets |
+| "Search Bitcoin related tweets" | Twitter keyword search |
 
 ---
 
@@ -82,40 +83,39 @@ Once connected, just ask your AI assistant:
 | Search | `get_latest_news` | Latest articles |
 | | `search_news` | Keyword search |
 | | `search_news_by_coin` | By coin (BTC, ETH, SOL...) |
-| | `get_news_by_source` | By source (Bloomberg, Reuters...) |
+| | `get_news_by_source` | By engine type and source (requires engine_type and news_type) |
 | | `get_news_by_engine` | By type (news, listing, onchain, meme, market) |
-| | `search_news_by_date` | Date range + coin/keyword |
+| | `search_news_advanced` | Advanced search (multiple filters) |
 | AI | `get_high_score_news` | Articles with score >= threshold |
 | | `get_news_by_signal` | By signal: long / short / neutral |
 | Real-time | `subscribe_latest_news` | WebSocket live collection |
+| Twitter | `get_twitter_user` | Get Twitter user profile |
+| | `get_twitter_user_by_id` | Get user profile by ID |
+| | `get_twitter_user_tweets` | Get user tweets |
+| | `search_twitter` | Twitter search |
+| | `search_twitter_advanced` | Advanced Twitter search (multiple filters) |
 
 ---
 
 ## Configuration
 
-### Free Trial Token
+### Get API Token
 
-Currently in trial period. You can use this public Token directly:
-
-```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiNjU1MW5ld3NtY3AiLCJ1c2VybmFtZSI6IjY1NTFuZXdzbWNwIn0.namttZDCVLOIlEGwIkJPBrcV-foaXQgqibDcmpck02c
-```
+Go to [https://6551.io/mcp](https://6551.io/mcp) to get your API Token.
 
 Set the environment variable:
 
 ```bash
 # macOS / Linux
-export OPENNEWS_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiNjU1MW5ld3NtY3AiLCJ1c2VybmFtZSI6IjY1NTFuZXdzbWNwIn0.namttZDCVLOIlEGwIkJPBrcV-foaXQgqibDcmpck02c"
+export OPENNEWS_TOKEN="<your-token>"
 
 # Windows PowerShell
-$env:OPENNEWS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiNjU1MW5ld3NtY3AiLCJ1c2VybmFtZSI6IjY1NTFuZXdzbWNwIn0.namttZDCVLOIlEGwIkJPBrcV-foaXQgqibDcmpck02c"
+$env:OPENNEWS_TOKEN = "<your-token>"
 ```
-
-> Replace with your own Token after the trial period ends.
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `OPENNEWS_TOKEN` | **Yes** | 6551 API Bearer Token (free trial Key available above) |
+| `OPENNEWS_TOKEN` | **Yes** | 6551 API Bearer Token (get from https://6551.io/mcp) |
 | `OPENNEWS_API_BASE` | No | Override REST API URL |
 | `OPENNEWS_WSS_URL` | No | Override WebSocket URL |
 | `OPENNEWS_MAX_ROWS` | No | Max results per query (default: 100) |
@@ -124,9 +124,9 @@ Also supports `config.json` in the project root (env vars take precedence):
 
 ```json
 {
-  "api_base_url": "https://ai.6551.io/news-platform",
-  "wss_url": "wss://ai.6551.io/news-platform/rpc",
-  "api_token": "your-api-token-here",
+  "api_base_url": "https://ai.6551.io",
+  "wss_url": "wss://ai.6551.io/open/news_wss",
+  "api_token": "<your-token>",
   "max_rows": 100
 }
 ```
@@ -168,7 +168,7 @@ Each article:
 <details>
 <summary><b>Other Clients — Manual Install</b> (click to expand)</summary>
 
-> In all configs below, replace `/path/to/opennews-mcp` with your actual local project path. The `OPENNEWS_TOKEN` value can use the free trial Token above.
+> In all configs below, replace `/path/to/opennews-mcp` with your actual local project path, and `<your-token>` with your Token from [https://6551.io/mcp](https://6551.io/mcp).
 
 ### Claude Desktop
 
@@ -181,7 +181,7 @@ Edit config (macOS: `~/Library/Application Support/Claude/claude_desktop_config.
       "command": "uv",
       "args": ["--directory", "/path/to/opennews-mcp", "run", "opennews-mcp"],
       "env": {
-        "OPENNEWS_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiNjU1MW5ld3NtY3AiLCJ1c2VybmFtZSI6IjY1NTFuZXdzbWNwIn0.namttZDCVLOIlEGwIkJPBrcV-foaXQgqibDcmpck02c"
+        "OPENNEWS_TOKEN": "<your-token>"
       }
     }
   }
@@ -199,7 +199,7 @@ Edit config (macOS: `~/Library/Application Support/Claude/claude_desktop_config.
       "command": "uv",
       "args": ["--directory", "/path/to/opennews-mcp", "run", "opennews-mcp"],
       "env": {
-        "OPENNEWS_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiNjU1MW5ld3NtY3AiLCJ1c2VybmFtZSI6IjY1NTFuZXdzbWNwIn0.namttZDCVLOIlEGwIkJPBrcV-foaXQgqibDcmpck02c"
+        "OPENNEWS_TOKEN": "<your-token>"
       }
     }
   }
@@ -217,7 +217,7 @@ Edit config (macOS: `~/Library/Application Support/Claude/claude_desktop_config.
       "command": "uv",
       "args": ["--directory", "/path/to/opennews-mcp", "run", "opennews-mcp"],
       "env": {
-        "OPENNEWS_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiNjU1MW5ld3NtY3AiLCJ1c2VybmFtZSI6IjY1NTFuZXdzbWNwIn0.namttZDCVLOIlEGwIkJPBrcV-foaXQgqibDcmpck02c"
+        "OPENNEWS_TOKEN": "<your-token>"
       }
     }
   }
@@ -235,7 +235,7 @@ VS Code sidebar > Cline > MCP Servers > Configure, edit `cline_mcp_settings.json
       "command": "uv",
       "args": ["--directory", "/path/to/opennews-mcp", "run", "opennews-mcp"],
       "env": {
-        "OPENNEWS_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiNjU1MW5ld3NtY3AiLCJ1c2VybmFtZSI6IjY1NTFuZXdzbWNwIn0.namttZDCVLOIlEGwIkJPBrcV-foaXQgqibDcmpck02c"
+        "OPENNEWS_TOKEN": "<your-token>"
       },
       "disabled": false,
       "autoApprove": []
@@ -258,7 +258,7 @@ mcpServers:
       - run
       - opennews-mcp
     env:
-      OPENNEWS_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiNjU1MW5ld3NtY3AiLCJ1c2VybmFtZSI6IjY1NTFuZXdzbWNwIn0.namttZDCVLOIlEGwIkJPBrcV-foaXQgqibDcmpck02c
+      OPENNEWS_TOKEN: <your-token>
 ```
 
 ### Cherry Studio
@@ -277,7 +277,7 @@ Settings > MCP Servers > Add > Type stdio: Command `uv`, Args `--directory /path
         "path": "uv",
         "args": ["--directory", "/path/to/opennews-mcp", "run", "opennews-mcp"],
         "env": {
-          "OPENNEWS_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiNjU1MW5ld3NtY3AiLCJ1c2VybmFtZSI6IjY1NTFuZXdzbWNwIn0.namttZDCVLOIlEGwIkJPBrcV-foaXQgqibDcmpck02c"
+          "OPENNEWS_TOKEN": "<your-token>"
         }
       }
     }
@@ -288,7 +288,7 @@ Settings > MCP Servers > Add > Type stdio: Command `uv`, Args `--directory /path
 ### Any stdio MCP client
 
 ```bash
-OPENNEWS_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiNjU1MW5ld3NtY3AiLCJ1c2VybmFtZSI6IjY1NTFuZXdzbWNwIn0.namttZDCVLOIlEGwIkJPBrcV-foaXQgqibDcmpck02c \
+OPENNEWS_TOKEN=<your-token> \
   uv --directory /path/to/opennews-mcp run opennews-mcp
 ```
 

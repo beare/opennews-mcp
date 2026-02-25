@@ -71,37 +71,115 @@ class NewsAPIClient:
     # ---------- REST endpoints ----------
 
     async def get_engine_tree(self) -> dict:
-        """GET /v1/engine/tree — fetch all news source categories."""
-        resp = await self._request("GET", f"{self.base_url}/v1/engine/tree")
+        """GET /open/news_type — 获取所有新闻源分类"""
+        resp = await self._request("GET", f"{self.base_url}/open/news_type")
         return resp.json()
 
     async def search_news(
         self,
         coins: Optional[list[str]] = None,
         query: Optional[str] = None,
-        news_type: Optional[str] = None,
-        engine_type: Optional[str] = None,
+        engine_types: Optional[dict[str, list[str]]] = None,
+        has_coin: bool = False,
         limit: int = 20,
         page: int = 1,
-        start_date: Optional[int] = None,
-        end_date: Optional[int] = None,
     ) -> dict:
-        """POST /v1/news/search — search news articles."""
+        """POST /open/news_search — 搜索新闻文章"""
         body: dict[str, Any] = {"limit": limit, "page": page}
         if coins:
             body["coins"] = coins
         if query:
-            body["query"] = query
-        if news_type:
-            body["newsType"] = news_type
-        if engine_type:
-            body["engineType"] = engine_type
-        if start_date is not None:
-            body["startDate"] = start_date
-        if end_date is not None:
-            body["endDate"] = end_date
+            body["q"] = query
+        if engine_types:
+            body["engineTypes"] = engine_types
+        if has_coin:
+            body["hasCoin"] = has_coin
 
-        resp = await self._request("POST", f"{self.base_url}/v1/news/search", json=body)
+        resp = await self._request("POST", f"{self.base_url}/open/news_search", json=body)
+        return resp.json()
+
+    # ---------- Twitter endpoints ----------
+
+    async def get_twitter_user_info(self, username: str) -> dict:
+        """POST /open/twitter_user_info — 获取Twitter用户信息（通过用户名）"""
+        resp = await self._request("POST", f"{self.base_url}/open/twitter_user_info", json={"username": username})
+        return resp.json()
+
+    async def get_twitter_user_by_id(self, user_id: str) -> dict:
+        """POST /open/twitter_user_by_id — 获取Twitter用户信息（通过ID）"""
+        resp = await self._request("POST", f"{self.base_url}/open/twitter_user_by_id", json={"userId": user_id})
+        return resp.json()
+
+    async def get_twitter_user_tweets(
+        self,
+        username: str,
+        max_results: int = 20,
+        product: str = "Latest",
+        include_replies: bool = False,
+        include_retweets: bool = False,
+    ) -> dict:
+        """POST /open/twitter_user_tweets — 获取用户推文"""
+        body = {
+            "username": username,
+            "maxResults": max_results,
+            "product": product,
+            "includeReplies": include_replies,
+            "includeRetweets": include_retweets,
+        }
+        resp = await self._request("POST", f"{self.base_url}/open/twitter_user_tweets", json=body)
+        return resp.json()
+
+    async def search_twitter(
+        self,
+        keywords: Optional[str] = None,
+        from_user: Optional[str] = None,
+        to_user: Optional[str] = None,
+        mention_user: Optional[str] = None,
+        hashtag: Optional[str] = None,
+        exclude_replies: bool = False,
+        exclude_retweets: bool = False,
+        min_likes: int = 0,
+        min_retweets: int = 0,
+        min_replies: int = 0,
+        since_date: Optional[str] = None,
+        until_date: Optional[str] = None,
+        lang: Optional[str] = None,
+        product: str = "Top",
+        max_results: int = 20,
+    ) -> dict:
+        """POST /open/twitter_search — Twitter搜索"""
+        body: dict[str, Any] = {
+            "maxResults": max_results,
+            "product": product,
+        }
+        if keywords:
+            body["keywords"] = keywords
+        if from_user:
+            body["fromUser"] = from_user
+        if to_user:
+            body["toUser"] = to_user
+        if mention_user:
+            body["mentionUser"] = mention_user
+        if hashtag:
+            body["hashtag"] = hashtag
+        if exclude_replies:
+            body["excludeReplies"] = exclude_replies
+        if exclude_retweets:
+            body["excludeRetweets"] = exclude_retweets
+        if min_likes > 0:
+            body["minLikes"] = min_likes
+        if min_retweets > 0:
+            body["minRetweets"] = min_retweets
+        if min_replies > 0:
+            body["minReplies"] = min_replies
+        if since_date:
+            body["sinceDate"] = since_date
+        if until_date:
+            body["untilDate"] = until_date
+        if lang:
+            body["lang"] = lang
+
+        resp = await self._request("POST", f"{self.base_url}/open/twitter_search", json=body)
         return resp.json()
 
 
@@ -126,11 +204,24 @@ class NewsWSClient:
             await self._ws.close()
             self._ws = None
 
-    async def subscribe_latest(self) -> dict:
+    async def subscribe_latest(
+        self,
+        engine_types: Optional[dict[str, list[str]]] = None,
+        coins: Optional[list[str]] = None,
+        has_coin: bool = False,
+    ) -> dict:
+        """订阅新闻推送，支持过滤器"""
         if not self._ws:
             await self.connect()
         req_id = self._next_id()
-        msg = {"method": "news.subscribeLatest", "id": req_id, "params": {}}
+        params: dict[str, Any] = {}
+        if engine_types:
+            params["engineTypes"] = engine_types
+        if coins:
+            params["coins"] = coins
+        if has_coin:
+            params["hasCoin"] = has_coin
+        msg = {"method": "news.subscribe", "id": req_id, "params": params}
         await self._ws.send(json.dumps(msg))
         resp = await self._ws.recv()
         return json.loads(resp)

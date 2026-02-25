@@ -22,7 +22,14 @@ if _CONFIG_PATH.exists():
 # ---------- API (env vars take precedence) ----------
 API_BASE_URL = os.environ.get("OPENNEWS_API_BASE") or _cfg.get("api_base_url", "")
 WSS_URL      = os.environ.get("OPENNEWS_WSS_URL")  or _cfg.get("wss_url", "")
-API_TOKEN    = os.environ.get("OPENNEWS_TOKEN")     or _cfg.get("api_token", "")
+API_TOKEN    = os.environ.get("OPENNEWS_TOKEN")    or _cfg.get("api_token", "")
+
+# 检查 token 是否配置
+if not API_TOKEN:
+    raise ValueError(
+        "OPENNEWS_TOKEN 未配置。请前往 https://6551.io/mcp 申请 API Token，"
+        "然后设置环境变量 OPENNEWS_TOKEN 或在 config.json 中配置 api_token。"
+    )
 
 # ---------- Safety ----------
 MAX_ROWS = int(os.environ.get("OPENNEWS_MAX_ROWS", 0) or _cfg.get("max_rows", 100))

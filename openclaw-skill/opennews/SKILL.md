@@ -1,6 +1,6 @@
 ---
 name: opennews
-description: Crypto news search, AI ratings, trading signals, and real-time updates via the OpenNews 6551 API. Supports keyword search, coin filtering, source filtering, date range queries, AI score ranking, and WebSocket live feeds.
+description: Crypto news search, AI ratings, trading signals, real-time updates, and Twitter/X data via the OpenNews 6551 API. Supports keyword search, coin filtering, source filtering, AI score ranking, WebSocket live feeds, Twitter user profiles, and tweet search.
 
 user-invocable: true
 metadata:
@@ -23,11 +23,13 @@ metadata:
       - win32
 ---
 
-# OpenNews Crypto News Skill
+# OpenNews Crypto News & Twitter Skill
 
-Query crypto news from the 6551 news platform REST API. All endpoints require a Bearer token via `$OPENNEWS_TOKEN`.
+Query crypto news and Twitter data from the 6551 platform REST API. All endpoints require a Bearer token via `$OPENNEWS_TOKEN`.
 
-**Base URL**: `https://ai.6551.io/news-platform`
+**Get your token**: https://6551.io/mcp
+
+**Base URL**: `https://ai.6551.io`
 
 ## Authentication
 
@@ -36,7 +38,9 @@ All requests require the header:
 Authorization: Bearer $OPENNEWS_TOKEN
 ```
 
-## Available Operations
+---
+
+## News Operations
 
 ### 1. Get News Sources
 
@@ -44,20 +48,18 @@ Fetch all available news source categories organized by engine type.
 
 ```bash
 curl -s -H "Authorization: Bearer $OPENNEWS_TOKEN" \
-  "https://ai.6551.io/news-platform/v1/engine/tree"
+  "https://ai.6551.io/open/news_type"
 ```
 
-Returns a tree with engine types (`news`, `listing`, `onchain`, `meme`, `market`) and their sub-categories (Bloomberg, Reuters, Binance, etc.). Each category has `code`, `name`, `enName`, and `aiEnabled` fields.
+Returns a tree with engine types (`news`, `listing`, `onchain`, `meme`, `market`) and their sub-categories.
 
-Use this first to discover available `newsType` codes for filtering.
+### 2. Search News
 
-### 2. Search News (Primary Endpoint)
+`POST /open/news_search` is the primary search endpoint.
 
-`POST /v1/news/search` is the single search endpoint. All filtering is done via JSON body parameters.
-
-**Get latest news (no filter):**
+**Get latest news:**
 ```bash
-curl -s -X POST "https://ai.6551.io/news-platform/v1/news/search" \
+curl -s -X POST "https://ai.6551.io/open/news_search" \
   -H "Authorization: Bearer $OPENNEWS_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"limit": 10, "page": 1}'
@@ -65,176 +67,235 @@ curl -s -X POST "https://ai.6551.io/news-platform/v1/news/search" \
 
 **Search by keyword:**
 ```bash
-curl -s -X POST "https://ai.6551.io/news-platform/v1/news/search" \
+curl -s -X POST "https://ai.6551.io/open/news_search" \
   -H "Authorization: Bearer $OPENNEWS_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"query": "bitcoin ETF", "limit": 10, "page": 1}'
+  -d '{"q": "bitcoin ETF", "limit": 10, "page": 1}'
 ```
 
 **Search by coin symbol:**
 ```bash
-curl -s -X POST "https://ai.6551.io/news-platform/v1/news/search" \
+curl -s -X POST "https://ai.6551.io/open/news_search" \
   -H "Authorization: Bearer $OPENNEWS_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"coins": ["BTC"], "limit": 10, "page": 1}'
 ```
 
-Multiple coins: `"coins": ["BTC", "ETH", "SOL"]`
-
-**Filter by news source:**
+**Filter by engine type and news type:**
 ```bash
-curl -s -X POST "https://ai.6551.io/news-platform/v1/news/search" \
+curl -s -X POST "https://ai.6551.io/open/news_search" \
   -H "Authorization: Bearer $OPENNEWS_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"newsType": "Bloomberg", "limit": 10, "page": 1}'
+  -d '{"engineTypes": {"news": ["Bloomberg", "Reuters"]}, "limit": 10, "page": 1}'
 ```
 
-Common sources: `Bloomberg`, `Reuters`, `Coindesk`, `CoinTelegraph`, `TheBlock`.
-
-**Filter by engine type:**
+**Only news with coins:**
 ```bash
-curl -s -X POST "https://ai.6551.io/news-platform/v1/news/search" \
+curl -s -X POST "https://ai.6551.io/open/news_search" \
   -H "Authorization: Bearer $OPENNEWS_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"engineType": "news", "limit": 10, "page": 1}'
+  -d '{"hasCoin": true, "limit": 10, "page": 1}'
 ```
 
-Engine types: `news`, `listing`, `onchain`, `meme`, `market`.
+### News Search Parameters
 
-**Search within date range:**
+| Parameter     | Type                      | Required | Description                                   |
+|--------------|---------------------------|----------|-----------------------------------------------|
+| `limit`      | integer                   | yes      | Max results per page (1-100)                  |
+| `page`       | integer                   | yes      | Page number (1-based)                         |
+| `q`          | string                    | no       | Full-text keyword search                      |
+| `coins`      | string[]                  | no       | Filter by coin symbols (e.g. `["BTC","ETH"]`) |
+| `engineTypes`| map[string][]string       | no       | Filter by engine and news types               |
+| `hasCoin`    | boolean                   | no       | Only return news with associated coins        |
+
+---
+
+## Twitter Operations
+
+### 1. Get Twitter User Info
+
+Get user profile by username.
+
 ```bash
-curl -s -X POST "https://ai.6551.io/news-platform/v1/news/search" \
+curl -s -X POST "https://ai.6551.io/open/twitter_user_info" \
   -H "Authorization: Bearer $OPENNEWS_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"startDate": 1708387200000, "endDate": 1708473600000, "limit": 20, "page": 1}'
+  -d '{"username": "elonmusk"}'
 ```
 
-Dates are Unix timestamps in **milliseconds**. You can combine with `coins`, `query`, `newsType`, and `engineType`.
+### 2. Get Twitter User by ID
 
-**Combined filters example:**
+Get user profile by numeric ID.
+
 ```bash
-curl -s -X POST "https://ai.6551.io/news-platform/v1/news/search" \
+curl -s -X POST "https://ai.6551.io/open/twitter_user_by_id" \
   -H "Authorization: Bearer $OPENNEWS_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"coins": ["BTC"], "query": "SEC", "engineType": "news", "limit": 20, "page": 1}'
+  -d '{"userId": "44196397"}'
 ```
 
-### 3. POST Body Parameters Reference
+### 3. Get User Tweets
 
-| Parameter    | Type       | Required | Description                                   |
-|-------------|------------|----------|-----------------------------------------------|
-| `limit`     | integer    | yes      | Max results per page (1-100)                  |
-| `page`      | integer    | yes      | Page number (1-based)                         |
-| `query`     | string     | no       | Full-text keyword search                      |
-| `coins`     | string[]   | no       | Filter by coin symbols (e.g. `["BTC","ETH"]`) |
-| `newsType`  | string     | no       | Filter by source code (e.g. `"Bloomberg"`)    |
-| `engineType`| string     | no       | Filter by engine (`news`,`listing`,`onchain`,`meme`,`market`) |
-| `startDate` | integer    | no       | Start timestamp in milliseconds               |
-| `endDate`   | integer    | no       | End timestamp in milliseconds                 |
+Get recent tweets from a user.
 
-## Article Data Structure
+```bash
+curl -s -X POST "https://ai.6551.io/open/twitter_user_tweets" \
+  -H "Authorization: Bearer $OPENNEWS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"username": "elonmusk", "maxResults": 20, "product": "Latest"}'
+```
 
-Each article in the `data` array contains:
+| Parameter         | Type    | Default  | Description                    |
+|------------------|---------|----------|--------------------------------|
+| `username`       | string  | required | Twitter username (without @)   |
+| `maxResults`     | integer | 20       | Max tweets (1-100)             |
+| `product`        | string  | "Latest" | "Latest" or "Top"              |
+| `includeReplies` | boolean | false    | Include reply tweets           |
+| `includeRetweets`| boolean | false    | Include retweets               |
+
+### 4. Search Twitter
+
+Search tweets with various filters.
+
+```bash
+curl -s -X POST "https://ai.6551.io/open/twitter_search" \
+  -H "Authorization: Bearer $OPENNEWS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"keywords": "bitcoin", "maxResults": 20, "product": "Top"}'
+```
+
+**Search from specific user:**
+```bash
+curl -s -X POST "https://ai.6551.io/open/twitter_search" \
+  -H "Authorization: Bearer $OPENNEWS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"fromUser": "VitalikButerin", "maxResults": 20}'
+```
+
+**Search by hashtag:**
+```bash
+curl -s -X POST "https://ai.6551.io/open/twitter_search" \
+  -H "Authorization: Bearer $OPENNEWS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"hashtag": "crypto", "minLikes": 100, "maxResults": 20}'
+```
+
+### Twitter Search Parameters
+
+| Parameter         | Type    | Default | Description                         |
+|------------------|---------|---------|-------------------------------------|
+| `keywords`       | string  | -       | Search keywords                     |
+| `fromUser`       | string  | -       | Tweets from specific user           |
+| `toUser`         | string  | -       | Tweets to specific user             |
+| `mentionUser`    | string  | -       | Tweets mentioning user              |
+| `hashtag`        | string  | -       | Filter by hashtag (without #)       |
+| `excludeReplies` | boolean | false   | Exclude reply tweets                |
+| `excludeRetweets`| boolean | false   | Exclude retweets                    |
+| `minLikes`       | integer | 0       | Minimum likes threshold             |
+| `minRetweets`    | integer | 0       | Minimum retweets threshold          |
+| `minReplies`     | integer | 0       | Minimum replies threshold           |
+| `sinceDate`      | string  | -       | Start date (YYYY-MM-DD)             |
+| `untilDate`      | string  | -       | End date (YYYY-MM-DD)               |
+| `lang`           | string  | -       | Language code (e.g. "en", "zh")     |
+| `product`        | string  | "Top"   | "Top" or "Latest"                   |
+| `maxResults`     | integer | 20      | Max tweets (1-100)                  |
+
+---
+
+## Data Structures
+
+### News Article
 
 ```json
 {
   "id": "unique-article-id",
-  "text": "Article headline / content text",
+  "text": "Article headline / content",
   "newsType": "Bloomberg",
   "engineType": "news",
-  "link": "https://original-article-url.com/...",
-  "coins": [
-    {"symbol": "BTC", "market_type": "spot", "match": "title"}
-  ],
+  "link": "https://...",
+  "coins": [{"symbol": "BTC", "market_type": "spot", "match": "title"}],
   "aiRating": {
     "score": 85,
     "grade": "A",
     "signal": "long",
     "status": "done",
-    "summary": "Chinese summary text",
-    "enSummary": "English summary text"
+    "summary": "中文摘要",
+    "enSummary": "English summary"
   },
   "ts": 1708473600000
 }
 ```
 
-### AI Rating Fields
+### Twitter User
 
-- `score`: 0-100 numeric rating (higher = more impactful)
-- `grade`: Letter grade (A/B/C/D)
-- `signal`: Trading signal — `"long"` (bullish), `"short"` (bearish), or `"neutral"`
-- `status`: `"done"` when AI analysis is complete
-- `summary` / `enSummary`: AI-generated summary in Chinese / English
+```json
+{
+  "userId": "44196397",
+  "screenName": "elonmusk",
+  "name": "Elon Musk",
+  "description": "...",
+  "followersCount": 170000000,
+  "friendsCount": 500,
+  "statusesCount": 30000,
+  "verified": true
+}
+```
+
+### Tweet
+
+```json
+{
+  "id": "1234567890",
+  "text": "Tweet content...",
+  "createdAt": "2024-02-20T12:00:00Z",
+  "retweetCount": 1000,
+  "favoriteCount": 5000,
+  "replyCount": 200,
+  "userScreenName": "elonmusk",
+  "hashtags": ["crypto", "bitcoin"],
+  "urls": [{"url": "https://..."}]
+}
+```
+
+---
 
 ## Common Workflows
 
 ### Quick Market Overview
-Fetch latest 10 news articles:
 ```bash
-curl -s -X POST "https://ai.6551.io/news-platform/v1/news/search" \
+curl -s -X POST "https://ai.6551.io/open/news_search" \
   -H "Authorization: Bearer $OPENNEWS_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"limit": 10, "page": 1}' | jq '.data[] | {text, newsType, signal: .aiRating.signal, score: .aiRating.score}'
+  -d '{"limit": 10, "page": 1}' | jq '.data[] | {text, newsType, signal: .aiRating.signal}'
 ```
 
-### High-Impact News
-Fetch articles and filter for AI score >= 80:
+### High-Impact News (score >= 80)
 ```bash
-curl -s -X POST "https://ai.6551.io/news-platform/v1/news/search" \
+curl -s -X POST "https://ai.6551.io/open/news_search" \
   -H "Authorization: Bearer $OPENNEWS_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"limit": 50, "page": 1}' | jq '[.data[] | select(.aiRating.score >= 80)] | sort_by(-.aiRating.score)'
+  -d '{"limit": 50, "page": 1}' | jq '[.data[] | select(.aiRating.score >= 80)]'
 ```
 
-### Bullish Signals Only
-Filter articles with `"long"` trading signal:
+### Crypto Twitter KOL Tweets
 ```bash
-curl -s -X POST "https://ai.6551.io/news-platform/v1/news/search" \
+curl -s -X POST "https://ai.6551.io/open/twitter_user_tweets" \
   -H "Authorization: Bearer $OPENNEWS_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"limit": 50, "page": 1}' | jq '[.data[] | select(.aiRating.signal == "long" and .aiRating.status == "done")]'
+  -d '{"username": "VitalikButerin", "maxResults": 10}'
 ```
 
-### Coin-Specific Research
-Get BTC-related news from the last 24 hours:
+### Trending Crypto Tweets
 ```bash
-curl -s -X POST "https://ai.6551.io/news-platform/v1/news/search" \
+curl -s -X POST "https://ai.6551.io/open/twitter_search" \
   -H "Authorization: Bearer $OPENNEWS_TOKEN" \
   -H "Content-Type: application/json" \
-  -d "{\"coins\": [\"BTC\"], \"startDate\": $(date -d '24 hours ago' +%s)000, \"limit\": 20, \"page\": 1}"
+  -d '{"keywords": "bitcoin", "minLikes": 1000, "product": "Top", "maxResults": 20}'
 ```
-
-### Source-Specific Feed
-Get Bloomberg articles about ETH:
-```bash
-curl -s -X POST "https://ai.6551.io/news-platform/v1/news/search" \
-  -H "Authorization: Bearer $OPENNEWS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"coins": ["ETH"], "newsType": "Bloomberg", "limit": 10, "page": 1}'
-```
-
-## Response Format
-
-All search responses follow this structure:
-```json
-{
-  "code": 0,
-  "data": [ ... articles ... ],
-  "total": 1234,
-  "page": 1,
-  "limit": 10
-}
-```
-
-- `code`: 0 = success
-- `data`: Array of article objects
-- `total`: Total matching articles available
-- `page` / `limit`: Current pagination state
 
 ## Notes
 
-- Rate limits apply; avoid requesting more than 100 articles per call.
-- AI ratings (`aiRating`) may not be available on all articles. Check `status == "done"` before using `score` or `signal`.
-- The `coins` array in articles shows which coins were detected and where the match occurred (`title`, `content`).
-- Timestamps (`ts`, `startDate`, `endDate`) are in Unix milliseconds.
-- Use `get /v1/engine/tree` first to discover all valid `newsType` and `engineType` values.
+- Get your API token at https://6551.io/mcp
+- Rate limits apply; max 100 results per request
+- AI ratings may not be available on all articles (check `status == "done"`)
+- Twitter usernames should not include the @ symbol
