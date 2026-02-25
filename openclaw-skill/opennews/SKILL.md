@@ -200,6 +200,61 @@ curl -s -X POST "https://ai.6551.io/open/twitter_search" \
 | `product`        | string  | "Top"   | "Top" or "Latest"                   |
 | `maxResults`     | integer | 20      | Max tweets (1-100)                  |
 
+### 5. Get Follower Events
+
+Get new followers or unfollowers for a user.
+
+```bash
+# Get new followers
+curl -s -X POST "https://ai.6551.io/open/twitter_follower_events" \
+  -H "Authorization: Bearer $OPENNEWS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"username": "elonmusk", "isFollow": true, "maxResults": 20}'
+
+# Get unfollowers
+curl -s -X POST "https://ai.6551.io/open/twitter_follower_events" \
+  -H "Authorization: Bearer $OPENNEWS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"username": "elonmusk", "isFollow": false, "maxResults": 20}'
+```
+
+| Parameter    | Type    | Default | Description                              |
+|-------------|---------|---------|------------------------------------------|
+| `username`  | string  | required| Twitter username (without @)             |
+| `isFollow`  | boolean | true    | true=new followers, false=unfollowers    |
+| `maxResults`| integer | 20      | Max events (1-100)                       |
+
+### 6. Get Deleted Tweets
+
+Get deleted tweets from a user.
+
+```bash
+curl -s -X POST "https://ai.6551.io/open/twitter_deleted_tweets" \
+  -H "Authorization: Bearer $OPENNEWS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"username": "elonmusk", "maxResults": 20}'
+```
+
+| Parameter    | Type    | Default | Description                    |
+|-------------|---------|---------|--------------------------------|
+| `username`  | string  | required| Twitter username (without @)   |
+| `maxResults`| integer | 20      | Max tweets (1-100)             |
+
+### 7. Get KOL Followers
+
+Get which KOLs (Key Opinion Leaders) are following a user.
+
+```bash
+curl -s -X POST "https://ai.6551.io/open/twitter_kol_followers" \
+  -H "Authorization: Bearer $OPENNEWS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"username": "elonmusk"}'
+```
+
+| Parameter   | Type   | Default | Description                    |
+|------------|--------|---------|--------------------------------|
+| `username` | string | required| Twitter username (without @)   |
+
 ---
 
 ## Data Structures

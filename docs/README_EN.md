@@ -71,6 +71,9 @@ Once connected, just ask your AI assistant:
 | "Show elonmusk's Twitter profile" | Get Twitter user info |
 | "What did elonmusk tweet recently" | Get user tweets |
 | "Search Bitcoin related tweets" | Twitter keyword search |
+| "Who followed/unfollowed elonmusk recently" | Get follower events |
+| "What tweets did elonmusk delete" | Get deleted tweets |
+| "Which KOLs follow elonmusk" | Get KOL followers |
 
 ---
 
@@ -94,6 +97,9 @@ Once connected, just ask your AI assistant:
 | | `get_twitter_user_tweets` | Get user tweets |
 | | `search_twitter` | Twitter search |
 | | `search_twitter_advanced` | Advanced Twitter search (multiple filters) |
+| | `get_twitter_follower_events` | Get follower/unfollower events |
+| | `get_twitter_deleted_tweets` | Get deleted tweets |
+| | `get_twitter_kol_followers` | Get KOL followers |
 
 ---
 

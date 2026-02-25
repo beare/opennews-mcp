@@ -179,3 +179,89 @@ async def search_twitter_advanced(
         })
     except Exception as e:
         return {"success": False, "error": str(e) or repr(e)}
+
+
+@mcp.tool()
+async def get_twitter_follower_events(
+    username: str,
+    ctx: Context,
+    is_follow: bool = True,
+    limit: int = 20,
+) -> dict:
+    """Get follower/unfollower events for a Twitter/X user.
+
+    Args:
+        username: Twitter username (without @).
+        is_follow: True for new followers, False for unfollowers.
+        limit: Maximum events to return (default 20, max 100).
+    """
+    api = ctx.request_context.lifespan_context.api
+    limit = min(max(1, limit), 100)
+    try:
+        result = await api.get_twitter_follower_events(
+            username=username,
+            is_follow=is_follow,
+            max_results=limit,
+        )
+        data = result.get("data", [])
+        return make_serializable({
+            "success": True,
+            "username": username,
+            "is_follow": is_follow,
+            "data": data,
+            "count": len(data) if isinstance(data, list) else 0,
+        })
+    except Exception as e:
+        return {"success": False, "error": str(e) or repr(e)}
+
+
+@mcp.tool()
+async def get_twitter_deleted_tweets(
+    username: str,
+    ctx: Context,
+    limit: int = 20,
+) -> dict:
+    """Get deleted tweets from a Twitter/X user.
+
+    Args:
+        username: Twitter username (without @).
+        limit: Maximum tweets to return (default 20, max 100).
+    """
+    api = ctx.request_context.lifespan_context.api
+    limit = min(max(1, limit), 100)
+    try:
+        result = await api.get_twitter_deleted_tweets(
+            username=username,
+            max_results=limit,
+        )
+        data = result.get("data", [])
+        return make_serializable({
+            "success": True,
+            "username": username,
+            "data": data,
+            "count": len(data) if isinstance(data, list) else 0,
+        })
+    except Exception as e:
+        return {"success": False, "error": str(e) or repr(e)}
+
+
+@mcp.tool()
+async def get_twitter_kol_followers(username: str, ctx: Context) -> dict:
+    """Get KOL (Key Opinion Leader) followers for a Twitter/X user.
+
+    Returns which influential accounts (KOLs) are following this user.
+
+    Args:
+        username: Twitter username (without @).
+    """
+    api = ctx.request_context.lifespan_context.api
+    try:
+        result = await api.get_twitter_kol_followers(username)
+        data = result.get("data", {})
+        return make_serializable({
+            "success": True,
+            "username": username,
+            "data": data,
+        })
+    except Exception as e:
+        return {"success": False, "error": str(e) or repr(e)}

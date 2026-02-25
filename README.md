@@ -71,6 +71,9 @@ cp -r openclaw-skill/opennews ~/.openclaw/skills/
 | "查看 elonmusk 的 Twitter 资料" | 获取 Twitter 用户信息 |
 | "elonmusk 最近发了什么推文" | 获取用户推文 |
 | "搜索 Bitcoin 相关推文" | Twitter 关键词搜索 |
+| "elonmusk 最近有谁关注/取关" | 获取关注/取关事件 |
+| "elonmusk 删了哪些推文" | 获取删推数据 |
+| "哪些大V关注了 elonmusk" | 获取大V关注者 |
 
 ---
 
@@ -94,6 +97,9 @@ cp -r openclaw-skill/opennews ~/.openclaw/skills/
 | | `get_twitter_user_tweets` | 获取用户推文 |
 | | `search_twitter` | Twitter 搜索 |
 | | `search_twitter_advanced` | Twitter 高级搜索（多过滤器） |
+| | `get_twitter_follower_events` | 获取关注/取关事件 |
+| | `get_twitter_deleted_tweets` | 获取删推数据 |
+| | `get_twitter_kol_followers` | 获取大V关注者 |
 
 ---
 

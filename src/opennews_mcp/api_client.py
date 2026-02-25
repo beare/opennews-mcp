@@ -182,6 +182,39 @@ class NewsAPIClient:
         resp = await self._request("POST", f"{self.base_url}/open/twitter_search", json=body)
         return resp.json()
 
+    async def get_twitter_follower_events(
+        self,
+        username: str,
+        is_follow: bool = True,
+        max_results: int = 20,
+    ) -> dict:
+        """POST /open/twitter_follower_events — 获取关注/取关事件"""
+        body = {
+            "username": username,
+            "isFollow": is_follow,
+            "maxResults": max_results,
+        }
+        resp = await self._request("POST", f"{self.base_url}/open/twitter_follower_events", json=body)
+        return resp.json()
+
+    async def get_twitter_deleted_tweets(
+        self,
+        username: str,
+        max_results: int = 20,
+    ) -> dict:
+        """POST /open/twitter_deleted_tweets — 获取删推数据"""
+        body = {
+            "username": username,
+            "maxResults": max_results,
+        }
+        resp = await self._request("POST", f"{self.base_url}/open/twitter_deleted_tweets", json=body)
+        return resp.json()
+
+    async def get_twitter_kol_followers(self, username: str) -> dict:
+        """POST /open/twitter_kol_followers — 获取大V关注者"""
+        resp = await self._request("POST", f"{self.base_url}/open/twitter_kol_followers", json={"username": username})
+        return resp.json()
+
 
 class NewsWSClient:
     """WebSocket client for real-time news subscription."""
